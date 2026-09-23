@@ -1,0 +1,78 @@
+name: Deploy to AWS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ vars.ENABLE_AWS_DEPLOY == 'true' }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push API image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_ENV"
+
+      - name: Update App Runner service
+        env:
+          AWS_APPRUNNER_SERVICE_ARN: ${{ secrets.AWS_APPRUNNER_SERVICE_ARN }}
+        run: |
+          if [ -z "$AWS_APPRUNNER_SERVICE_ARN" ]; then
+            echo "AWS_APPRUNNER_SERVICE_ARN is required after the first App Runner service is created."
+            exit 1
+          fi
+
+          aws apprunner update-service \
+            --service-arn "$AWS_APPRUNNER_SERVICE_ARN" \
+            --source-configuration "ImageRepository={ImageIdentifier=$IMAGE_URI,ImageRepositoryType=ECR,ImageConfiguration={Port=8000}}"
+
+      - name: Wait for service to finish deploying
+        env:
+          AWS_APPRUNNER_SERVICE_ARN: ${{ secrets.AWS_APPRUNNER_SERVICE_ARN }}
+        run: |
+          for attempt in {1..30}; do
+            STATUS=$(aws apprunner describe-service --service-arn "$AWS_APPRUNNER_SERVICE_ARN" --query "Service.Status" --output text)
+            echo "App Runner status: $STATUS"
+            if [ "$STATUS" = "RUNNING" ]; then
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "Service did not reach RUNNING in time."
+          exit 1
+
+      - name: Verify health endpoint
+        env:
+          APP_URL: ${{ secrets.AWS_APP_URL }}
+        run: |
+          curl --fail --silent "$APP_URL/health"
+
+      - name: Verify CloudWatch logs
+        env:
+          CLOUDWATCH_LOG_GROUP: ${{ secrets.CLOUDWATCH_LOG_GROUP }}
+        run: |
+          python -m pip install boto3
+          python scripts/verify_cloudwatch_logs.py "$CLOUDWATCH_LOG_GROUP"

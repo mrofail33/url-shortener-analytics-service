@@ -243,6 +243,7 @@ The repo includes tests and CI so an interviewer can verify the core behavior qu
 
 - tests: `tests/test_urls.py`
 - workflow: `.github/workflows/ci.yml`
+- AWS deploy workflow: `.github/workflows/aws-deploy.yml`
 - proof guide: `docs/interview-proof.md`
 - deployment proof: `docs/deployment-proof.md`
 - AWS deployment and CloudWatch plan: `docs/aws-deployment-cloudwatch.md`
@@ -252,6 +253,10 @@ Safe resume wording:
 
 > Built a FastAPI URL shortener with PostgreSQL persistence, Redis caching, click analytics, Docker Compose, and pytest coverage for core API behavior.
 
-Cloud/deployment wording after discussing the repo honestly:
+Cloud/deployment wording before AWS secrets are connected:
 
 > Prepared the service for AWS deployment with Docker, GitHub Actions CI, and a documented CloudWatch logging path.
+
+Cloud/deployment wording after the AWS deploy workflow passes:
+
+> Deployed the Dockerized FastAPI URL shortener to AWS App Runner through GitHub Actions and verified CloudWatch logs.
