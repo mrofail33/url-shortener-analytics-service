@@ -1,0 +1,19 @@
+{
+  "benchmark_date": "2026-09-23",
+  "status": "blocked",
+  "blocked_components": [
+    "PostgreSQL",
+    "Redis"
+  ],
+  "reason": "Docker engine was not running, so docker-compose services required for the real redirect benchmark were unavailable.",
+  "attempted_benchmark": "scripts/benchmark_redirects.py requires the repo's real PostgreSQL and Redis services.",
+  "docker_ps_returncode": 1,
+  "docker_ps_stdout": "",
+  "docker_ps_stderr": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.",
+  "metrics_not_reported": [
+    "average redirect latency",
+    "successful request rate",
+    "Redis cache hit rate",
+    "cached vs uncached database behavior"
+  ]
+}

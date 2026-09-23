@@ -170,6 +170,18 @@ pytest
 
 The tests use SQLite in memory so they can run quickly without starting PostgreSQL.
 
+## Benchmark Status
+
+Redirect benchmark tooling is included in `scripts/benchmark_redirects.py`, but the 2026-09-23 run was blocked because the local Docker engine was not running, so the repo's PostgreSQL and Redis services were unavailable. No redirect latency, cache hit-rate, or cached-vs-uncached database metrics are reported from this run.
+
+Raw blocker evidence is saved in `docs/benchmark-results/redirect_benchmark_blocked_2026-09-23.json`.
+
+Tests still passed against the in-memory SQLite setup:
+
+```text
+4 passed
+```
+
 ## Architecture Explanation
 
 The app is split into small layers:
@@ -228,9 +240,9 @@ Redis is used as a performance improvement. PostgreSQL remains the source of tru
 
 **URL Shortener & Analytics Service | Python, FastAPI, PostgreSQL, Redis, Docker**
 
-- Developed a REST API that generates unique shortened URLs and redirects users to their original destinations.
-- Implemented PostgreSQL persistence and click analytics to track URL creation and redirect activity.
-- Added Redis caching for frequently accessed URLs to reduce unnecessary database queries.
+- Built and tested a FastAPI URL shortener with redirect tracking and stats endpoints, as verified by 4 passing automated tests.
+- Implemented PostgreSQL persistence, Redis lookup caching, and click analytics in the service layer; production-like Redis/PostgreSQL redirect benchmarking is blocked until Docker services are running.
+- Added benchmark tooling for 500 cached and 500 uncached redirects, but no cache-latency metric is claimed from the blocked 2026-09-23 run.
 - Containerized application services with Docker for consistent development and deployment.
 
 ## Notes for Beginners
