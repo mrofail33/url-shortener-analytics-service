@@ -11,6 +11,7 @@ Safe interview claim:
 - `.github/workflows/ci.yml` runs the test suite on push and pull request.
 - `docs/screenshots/openapi-docs.png` shows the API docs captured from a live local server.
 - The test suite runs with SQLite so CI can verify behavior without external services.
+- `docs/aws-deployment-cloudwatch.md` documents the AWS + CloudWatch path without adding Terraform or Kubernetes.
 
 ## Local verification commands
 
