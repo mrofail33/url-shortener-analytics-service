@@ -95,6 +95,10 @@ Expected response:
 
 ## API Examples
 
+## Demo Screenshot
+
+![FastAPI OpenAPI docs showing URL shortener endpoints](docs/screenshots/openapi-docs.png)
+
 ### Create a Short URL
 
 ```bash
@@ -232,3 +236,17 @@ Redis is used as a performance improvement. PostgreSQL remains the source of tru
 ## Notes for Beginners
 
 This project intentionally avoids heavy production features like authentication, rate limiting, background jobs, and database migrations. Those are good future improvements, but the current version keeps the core system clear and easy to explain.
+
+## Interview Proof
+
+The repo includes tests and CI so an interviewer can verify the core behavior quickly:
+
+- tests: `tests/test_urls.py`
+- workflow: `.github/workflows/ci.yml`
+- proof guide: `docs/interview-proof.md`
+- deployment proof: `docs/deployment-proof.md`
+- security notes: `docs/security-notes.md`
+
+Safe resume wording:
+
+> Built a FastAPI URL shortener with PostgreSQL persistence, Redis caching, click analytics, Docker Compose, and pytest coverage for core API behavior.
