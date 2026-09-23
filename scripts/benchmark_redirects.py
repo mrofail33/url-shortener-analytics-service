@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import statistics
 import time
 from pathlib import Path
+
+os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/url_shortener")
+os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
+os.environ.setdefault("BASE_URL", "http://testserver")
 
 from fastapi.testclient import TestClient
 from redis import Redis
@@ -75,7 +80,7 @@ def main() -> int:
 
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    redis_client = Redis.from_url("redis://localhost:6379/15", decode_responses=True)
+    redis_client = Redis.from_url(os.environ["REDIS_URL"], decode_responses=True)
     redis_client.flushdb()
 
     client = TestClient(app)
